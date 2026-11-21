@@ -18,10 +18,11 @@
 //
 simple Source
 {
-     parameters:
-         double sendIaTime @unit(ms) = default(10 ms);
-        //volatile double generatorPeriod @unit(ms) = default(100ms);
-      //  @display("i=block/source");
+    parameters:
+        double netwload = default(0.8);
+        double maxSimTime @unit(s) = default(1s);
+        double sendIaTime @unit(ms) = default(10 ms);
+        //@display("i=block/source");
     gates:
         output txPackets;
 }

@@ -27,13 +27,18 @@ class Source : public cSimpleModule
 {
 private:
     cMessage *sendMessageEvent;
+    double sendingTime;
+    simtime_t maxSimTime;
+    long numSentPackets;
 
-  public:
+public:
     Source();
     virtual ~Source();
-  protected:
-    virtual void initialize();
-    virtual void handleMessage(cMessage *msg);
+
+protected:
+    virtual void initialize() override;
+    virtual void handleMessage(cMessage *msg) override;
+    virtual void finish() override;
 };
 
 #endif
