@@ -19,11 +19,11 @@
 simple MyQ
 {
     parameters: 
-        int qlp;
-      gates:
+        int qlp = default(0);
+        //@display("i=block/queue");
+    gates:
         input rxScheduling;
         input rxPackets;
         output txPackets;
         output txInfo;
-      //  output txScheduling;
 }

@@ -17,51 +17,54 @@
 
 Define_Module(MyQ);
 
+MyQ::MyQ()
+{
+}
+
+MyQ::~MyQ()
+{
+    queue.clear();
+}
+
 void MyQ::initialize()
 {
     queue.setName("queue");
 }
 
 void MyQ::handleMessage(cMessage *msg)
-
 {
-
-    int ql; //=9;
-
-    if (msg->arrivedOn("rxPackets")){
+    if (msg->arrivedOn("rxPackets")) {
+        // Sosire pachet de la generatorul sursa -> se insereaza in coada
         queue.insert(msg);
-    } else if (msg->arrivedOn("rxScheduling")){
-        //read parameters from msg
-        //int nrOfRadioBlocks = (int)msg->par("nrOfBlocks");
-        delete msg;
-        //empty the queue !
-        while(!queue.isEmpty()){ //for(int j = 0;j < nrOfRadioBlocks;j++ )
-          msg = (cMessage *)queue.pop();
-          send(msg, "txPackets");
+    } else if (msg->arrivedOn("rxScheduling")) {
+        // Comanda de alocare primita de la Scheduler
+        int nrBlocks = 0;
+        if (msg->hasPar("nrBlocks")) {
+            nrBlocks = (int)msg->par("nrBlocks").longValue();
+        } else if (msg->hasPar("nrOfBlocks")) {
+            nrBlocks = (int)msg->par("nrOfBlocks").longValue();
+        }
+        delete msg; // stergem mesajul de comanda
+
+        // Scoatem cel mult nrBlocks pachete din coada si le transmitem catre Sink
+        // La depanare folosim conditia !queue.isEmpty(); cand schedulerul e calibrat,
+        // nu va aloca mai multe blocuri decat sunt disponibile.
+        for (int j = 0; j < nrBlocks && !queue.isEmpty(); j++) {
+            cMessage *pkt = (cMessage *)queue.pop();
+            send(pkt, "txPackets");
         }
     }
-    ql = queue.getLength();
 
+    // Aflam lungimea curenta a cozii
+    int ql = queue.getLength();
 
+    // Transmitem starea cozii catre Scheduler
     cMessage *qInfo = new cMessage("qInfo");
     qInfo->addPar("ql_info");
-    qInfo->par("ql_info").setLongValue(ql);//ql instead of 2
+    qInfo->par("ql_info").setLongValue(ql);
 
-    //only for test
+    int userIndex = getParentModule()->getIndex();
+    EV << "User[" << userIndex << "] MyQ: ql = " << ql << endl;
 
-    int i =  getParentModule()->getIndex();
-
-    long ql_info_tst = qInfo->par("ql_info");
-    EV << "ql[" << i<<"] = " << ql << " ql_info_tst = " << ql_info_tst << endl;
     send(qInfo, "txInfo");
-
-    /* Communication between modules using parameters
-    ql = queue.getLength();
-    cPar&  qlpar = par("qlp");
-    qlpar.setIntValue(ql);
-    //next 2 statements only for debug
-    int qt = par("qlp").intValue();
-    EV << "qt= "<<qt <<endl;
-    */
-
 }

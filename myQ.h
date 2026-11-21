@@ -25,13 +25,14 @@ using namespace omnetpp;
  */
 class MyQ : public cSimpleModule
 {
+  public:
+    MyQ();
+    virtual ~MyQ();
 
   protected:
-     //cMessage *msgServiced;
-    // cMessage *endServiceMsg;
-     cQueue queue;
-    virtual void initialize();
-    virtual void handleMessage(cMessage *msg);
+    cQueue queue;
+    virtual void initialize() override;
+    virtual void handleMessage(cMessage *msg) override;
 };
 
 #endif
