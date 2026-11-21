@@ -18,11 +18,11 @@
 //
 simple Scheduler
 {
-      parameters:
-        //@display("i=block/dispatch");
-        //volatile 
+    parameters:
         double schedulingPeriod @unit(ms) = default(1 ms);
-        int gateSize;//me, dt
+        int channelsCount = default(10);
+        int gateSize;
+        //@display("i=block/dispatch");
 
     gates:
         output txScheduling[gateSize];

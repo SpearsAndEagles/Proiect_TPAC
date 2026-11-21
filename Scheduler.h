@@ -27,17 +27,25 @@ class Scheduler : public cSimpleModule
 {
 public:
     Scheduler();
-    ~Scheduler();
+    virtual ~Scheduler();
+
 private:
     cMessage *selfMsg;
     int NrUsers;
     int NrOfChannels;
-   // int userWeights[3];
-    int q[10];// queues' lengths. NrUsers schould be <= 10 !!!
-    int NrBlocks[10];
-  protected:
-    virtual void initialize();
-    virtual void handleMessage(cMessage *msg);
+    int q[10];                     // Lungimile raportate ale cozilor (NrUsers <= 10)
+    int NrBlocks[10];              // Blocurile alocate in ciclul curent
+    int userWeights[10];           // Ponderile/prioritatile utilizatorilor
+    int currentRRIndex;            // Indexul curent pentru rotatia Round Robin
+    long totalBlocksAllocated[10]; // Statistici: total blocuri primite de fiecare user
+    long totalCycles;              // Statistici: numar total de cicluri de scheduling
+
+    void scheduleWeightedRoundRobin();
+
+protected:
+    virtual void initialize() override;
+    virtual void handleMessage(cMessage *msg) override;
+    virtual void finish() override;
 };
 
 #endif
