@@ -14,21 +14,61 @@
 // 
 
 #include "Sink.h"
+#include <fstream>
 
 Define_Module(Sink);
 
 void Sink::initialize()
 {
-   // lifetimeSignal = registerSignal("lifetime");
+    gateSize = par("gateSize").intValue();
+    totalPacketsReceived = 0;
+    lifetimeSignal = registerSignal("lifetime");
+
+    for (int i = 0; i < 10; i++) {
+        packetsPerUser[i] = 0;
+    }
 }
 
 void Sink::handleMessage(cMessage *msg)
 {
     simtime_t lifetime = simTime() - msg->getCreationTime();
-    //if (msg->arrivedOn("rxPackets",i)) {
-        //do something msg is from user [i]
-    //}
-      EV << "Received " << msg->getName() << ", lifetime: " << lifetime << "s" << endl;
-    //  emit(lifetimeSignal, lifetime);
-      delete msg;
+    totalPacketsReceived++;
+
+    int userIndex = -1;
+    for (int i = 0; i < gateSize; i++) {
+        if (msg->arrivedOn("rxPackets", i)) {
+            userIndex = i;
+            break;
+        }
+    }
+
+    if (userIndex >= 0 && userIndex < 10) {
+        packetsPerUser[userIndex]++;
+    }
+
+    emit(lifetimeSignal, lifetime);
+
+    EV << "Sink: Primit pachet de la User[" << userIndex
+       << "] la T=" << simTime() << ", lifetime: " << lifetime << "s" << endl;
+
+    // Stergem mesajul imediat pentru a elibera memoria si a evita acumularea de delay
+    delete msg;
+}
+
+void Sink::finish()
+{
+    EV << "=== Sink Finish ===" << endl;
+    EV << "Total pachete receptionate: " << totalPacketsReceived << endl;
+    for (int i = 0; i < gateSize && i < 10; i++) {
+        EV << "Pachete receptionate de la User[" << i << "]: " << packetsPerUser[i] << endl;
+    }
+
+    std::ofstream outFile("results_sink.txt");
+    if (outFile.is_open()) {
+        outFile << "TotalPacketsReceived=" << totalPacketsReceived << std::endl;
+        for (int i = 0; i < gateSize && i < 10; i++) {
+            outFile << "User[" << i << "]=" << packetsPerUser[i] << std::endl;
+        }
+        outFile.close();
+    }
 }

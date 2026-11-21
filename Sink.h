@@ -26,10 +26,15 @@ using namespace omnetpp;
 class Sink : public cSimpleModule
 {
 private:
-  //  simsignal_t lifetimeSignal;
-  protected:
-    virtual void initialize();
-    virtual void handleMessage(cMessage *msg);
+    int gateSize;
+    simsignal_t lifetimeSignal;
+    long totalPacketsReceived;
+    long packetsPerUser[10];
+
+protected:
+    virtual void initialize() override;
+    virtual void handleMessage(cMessage *msg) override;
+    virtual void finish() override;
 };
 
 #endif
