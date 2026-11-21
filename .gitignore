@@ -1,0 +1,12 @@
+# OMNeT++ build artifacts
+*.o
+*.d
+*.out
+*_m.cc
+*_m.h
+*.exe
+Makefile
+results/
+
+# macOS
+.DS_Store
